@@ -21,3 +21,12 @@ export class RegisterDto {
   @ApiProperty()
   platform: string;
 }
+
+export class UpdateUserDto {
+  @ApiProperty({ required: false })
+  firstName: string;
+  @ApiProperty({ required: false })
+  lastName: string;
+  @ApiProperty({ required: true })
+  platform: string;
+}

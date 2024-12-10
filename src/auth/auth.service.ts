@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, UpdateUserDto } from './dto/auth.dto';
 
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
@@ -12,15 +12,16 @@ export class AuthService {
   constructor(private readonly httpService: HttpService) {}
 
   async getPAT(platform: string) {
+    const config = KeyCloakConfig[platform];
+    const urlSearchParams = new URLSearchParams();
+    urlSearchParams.append('grant_type', 'client_credentials');
+    urlSearchParams.append('client_id', config.client_id);
+    urlSearchParams.append('client_secret', config.client_secret);
     const res = await firstValueFrom(
       this.httpService
         .post(
           'http://localhost:8080/realms/nestjs-tutorial/protocol/openid-connect/token',
-          new URLSearchParams({
-            grant_type: 'client_credentials',
-            scope: 'openid',
-            ...KeyCloakConfig[platform],
-          }),
+          urlSearchParams,
         )
         .pipe(
           catchError((error) => {
@@ -62,8 +63,7 @@ export class AuthService {
   }
 
   async registerUser(registerDto: RegisterDto) {
-    const res = this.getPAT(registerDto.platform);
-
+    const res = await this.getPAT(registerDto.platform);
     const createUserRes = await firstValueFrom(
       this.httpService
         .post(
@@ -71,12 +71,15 @@ export class AuthService {
           {
             username: registerDto.email,
             email: registerDto.email,
+            firstName: registerDto.firstName,
+            lastName: registerDto.lastName,
             enabled: true,
             emailVerified: true,
             credentials: [
               {
                 type: 'password',
                 value: registerDto.password,
+                temporary: false,
               },
             ],
           },
@@ -88,7 +91,10 @@ export class AuthService {
         )
         .pipe(
           catchError((error) => {
-            this.logger.error(error);
+            this.logger.error(
+              `Keycloak API Error: ${JSON.stringify(error.response?.data || error.message)}`,
+            );
+
             throw new BadRequestException('Something went wrong');
           }),
         ),
@@ -97,9 +103,61 @@ export class AuthService {
     return createUserRes.data;
   }
 
+  async updateUser(updateUser: UpdateUserDto, userId: string) {
+    const res = await this.getPAT(updateUser.platform);
+    const updatedUserRes = await firstValueFrom(
+      this.httpService
+        .put(
+          `http://localhost:8080/admin/realms/nestjs-tutorial/users/${userId}`,
+          {
+            firstName: updateUser.firstName,
+            lastName: updateUser.lastName,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${res}`,
+            },
+          },
+        )
+        .pipe(
+          catchError((error) => {
+            this.logger.error(
+              `Keycloak API Error: ${JSON.stringify(error.response?.data || error.message)}`,
+            );
+
+            throw new BadRequestException('Something went wrong');
+          }),
+        ),
+    );
+
+    return updatedUserRes.data;
+  }
+
   async createUser() {}
 
-  async getAllUsers() {}
+  async getAllUsers() {
+    //TODO: Normally this will come in headers this is just experimenting
+    const res = await this.getPAT('admin');
+    const usersList = await firstValueFrom(
+      this.httpService
+        .get(`http://localhost:8080/admin/realms/nestjs-tutorial/users`, {
+          headers: {
+            Authorization: `Bearer ${res}`,
+          },
+        })
+        .pipe(
+          catchError((error) => {
+            this.logger.error(
+              `Keycloak API Error: ${JSON.stringify(error.response?.data || error.message)}`,
+            );
+
+            throw new BadRequestException('Something went wrong');
+          }),
+        ),
+    );
+
+    return usersList.data;
+  }
 
   async changePassword() {}
 }
