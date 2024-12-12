@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, UpdateUserDto } from './dto/auth.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
@@ -29,5 +29,23 @@ export class AuthController {
   @Get('/user')
   getUsers() {
     return this.authService.getAllUsers();
+  }
+
+  @Get('/roles')
+  getRoles() {
+    return this.authService.getRoles();
+  }
+
+  @Get('roles/:name')
+  async getRoleByName(@Param('name') name: string) {
+    return await this.authService.getRoleByName(name);
+  }
+
+  @Patch('/roles/:roleName/:userId')
+  async mapRoleToUser(
+    @Param('roleName') roleName: string,
+    @Param('userId') userId: string,
+  ) {
+    return await this.authService.assignRoleToUser(userId, roleName);
   }
 }

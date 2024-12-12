@@ -133,8 +133,6 @@ export class AuthService {
     return updatedUserRes.data;
   }
 
-  async createUser() {}
-
   async getAllUsers() {
     //TODO: Normally this will come in headers this is just experimenting
     const res = await this.getPAT('admin');
@@ -157,6 +155,85 @@ export class AuthService {
     );
 
     return usersList.data;
+  }
+
+  async getRoles() {
+    const res = await this.getPAT('admin');
+    const roles = await firstValueFrom(
+      this.httpService
+        .get(`http://localhost:8080/admin/realms/nestjs-tutorial/roles`, {
+          headers: {
+            Authorization: `Bearer ${res}`,
+          },
+        })
+        .pipe(
+          catchError((error) => {
+            this.logger.error(
+              `Keycloak API Error: ${JSON.stringify(error.response?.data || error.message)}`,
+            );
+
+            throw new BadRequestException('Something went wrong');
+          }),
+        ),
+    );
+
+    return roles.data;
+  }
+
+  async getRoleByName(name: string) {
+    const res = await this.getPAT('admin');
+    const role = await firstValueFrom(
+      this.httpService
+        .get(
+          `http://localhost:8080/admin/realms/nestjs-tutorial/roles/${name}`,
+          {
+            headers: {
+              Authorization: `Bearer ${res}`,
+            },
+          },
+        )
+        .pipe(
+          catchError((error) => {
+            this.logger.error(
+              `Keycloak API Error: ${JSON.stringify(error.response?.data || error.message)}`,
+            );
+
+            throw new BadRequestException('Something went wrong');
+          }),
+        ),
+    );
+
+    return role.data;
+  }
+
+  async assignRoleToUser(userId: string, roleName: string) {
+    //TODO: This is just testing code
+    const role = await this.getRoleByName(roleName);
+    const res = await this.getPAT('admin');
+    const data = [role];
+    const mappedVal = await firstValueFrom(
+      this.httpService
+        .post(
+          `http://localhost:8080/admin/realms/nestjs-tutorial/users/${userId}/role-mappings/realm`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${res}`,
+            },
+          },
+        )
+        .pipe(
+          catchError((error) => {
+            this.logger.error(
+              `Keycloak API Error: ${JSON.stringify(error.response?.data || error.message)}`,
+            );
+
+            throw new BadRequestException('Something went wrong');
+          }),
+        ),
+    );
+
+    return mappedVal.data;
   }
 
   async changePassword() {}
