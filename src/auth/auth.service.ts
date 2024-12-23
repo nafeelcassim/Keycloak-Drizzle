@@ -236,5 +236,31 @@ export class AuthService {
     return mappedVal.data;
   }
 
+  async getCredentials(userId: string) {
+    const res = await this.getPAT('admin');
+    const credentials = await firstValueFrom(
+      this.httpService
+        .get(
+          `http://localhost:8080/admin/realms/nestjs-tutorial/users/${userId}/credentials`,
+          {
+            headers: {
+              Authorization: `Bearer ${res}`,
+            },
+          },
+        )
+        .pipe(
+          catchError((error) => {
+            this.logger.error(
+              `Keycloak API Error: ${JSON.stringify(error.response?.data || error.message)}`,
+            );
+
+            throw new BadRequestException('Something went wrong');
+          }),
+        ),
+    );
+
+    return credentials.data;
+  }
+
   async changePassword() {}
 }

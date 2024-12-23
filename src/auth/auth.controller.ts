@@ -41,6 +41,11 @@ export class AuthController {
     return await this.authService.getRoleByName(name);
   }
 
+  @Get('credentials/:userId')
+  async getCredentials(@Param('userId') userId: string) {
+    return await this.authService.getCredentials(userId);
+  }
+
   @Patch('/roles/:roleName/:userId')
   async mapRoleToUser(
     @Param('roleName') roleName: string,
