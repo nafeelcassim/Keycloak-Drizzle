@@ -25,3 +25,4 @@ jobs:
             -Dsonar.projectKey=nafeelcassim_Keycloak-Drizzle
             -Dsonar.organization=nafeelcassim
             -Dsonar.qualitygate.wait=true
+            -Dsonar.coverage.exclusions=**/*
