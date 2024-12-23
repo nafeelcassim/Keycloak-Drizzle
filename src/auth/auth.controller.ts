@@ -51,7 +51,6 @@ export class AuthController {
     @Param('roleName') roleName: string,
     @Param('userId') userId: string,
   ) {
-    console.log('');
     return await this.authService.assignRoleToUser(userId, roleName);
   }
 }
