@@ -1,17 +1,17 @@
 export const KeyCloakConfig = {
-  baseUrl: 'http://localhost:8080',
-  grantType: 'password',
-  scope: 'openid',
+  baseUrl: process.env.KEYCLOAK_BASE_URL,
+  grantType: process.env.KEYCLOAK_GRANT_TYPE,
+  scope: process.env.KEYCLOAK_SCOPE,
   web: {
-    client_id: 'nestjs-web-client',
-    client_secret: 'c5BJ6IdC8deIhiIsdMvxb75Tt4gVxcRI',
+    client_id: process.env.KEYCLOAK_WEB_CLIENT_ID,
+    client_secret: process.env.KEYCLOAK_WEB_CLIENT_SECRET,
   },
   admin: {
-    client_id: 'nest-js-admin',
-    client_secret: '8iNkRGgpbKoFv0yRf4w6D6y9qVVSpxkN',
+    client_id: process.env.KEYCLOAK_ADMIN_CLIENT_ID,
+    client_secret: process.env.KEYCLOAK_ADMIN_CLIENT_SECRET,
   },
   mobile: {
-    client_id: 'nestjs-app-client',
-    client_secret: 'SpzBhuNBkPwJBD4jqVgHc8hoTGBy7PAw',
+    client_id: process.env.KEYCLOAK_MOBILE_CLIENT_ID,
+    client_secret: process.env.KEYCLOAK_MOBILE_CLIENT_SECRET,
   },
 };

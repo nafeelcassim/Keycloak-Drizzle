@@ -10,7 +10,7 @@ const pool = new Pool({
 const db = drizzle(pool, { schema }) as NodePgDatabase<typeof schema>;
 
 async function main() {
-  const userIds = await Promise.all(
+  await Promise.all(
     Array(50)
       .fill('')
       .map(async () => {

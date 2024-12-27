@@ -1,0 +1,4 @@
+export const ELASTIC_SEARCH_CONSTANTS = {
+  API_KEY: process.env.ELASTIC_SEARCH_API,
+  NODE: process.env.ELASTIC_SEARCH_NODE,
+};
